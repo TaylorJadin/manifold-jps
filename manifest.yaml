@@ -72,20 +72,6 @@ actions:
         nodeGroup: cp
         path: ${globals.path}
         keyword: ${globals.shortname}
-
-addons:
-  - id: change-domain
-    name: Domain Configuration
-    description: Change domain name and issue Let's Encrypt certificates.
-    permanent: true
-    buttons:
-      - confirmText: Are you sure you want to proceed?
-        loadingText: Changing domain...
-        action: changeDomain
-        caption: Change
-        successText: The domain has been updated successfully!
-        settings: domain
-        title: Please specify the new domain name
     
 success: | 
   **${env.displayName}**: [https://${env.domain}/](https://${env.domain}/)
