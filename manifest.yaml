@@ -17,14 +17,19 @@ globals:
   repo: https://github.com/ManifoldScholar/manifold-docker-compose.git
   manifold_tag: 
 
+ssl: true
+
 nodes:
-  nodeType: dockerengine
-  nodeGroup: cp
-  cloudlets: 32
-  fixedcloudlets: 1
-  extip: true
-  displayName: AppServer
-  volumes: ["${globals.path}"]
+  - cloudlets: 4
+    count: 1
+    nodeGroup: bl
+    nodeType: nginx
+  - nodeType: dockerengine
+    nodeGroup: cp
+    cloudlets: 32
+    fixedcloudlets: 1
+    displayName: AppServer
+    volumes: ["${globals.path}"]
 
 settings:
   domain:
@@ -54,14 +59,15 @@ actions:
         echo "MANIFOLD_TAG=$LATEST_STABLE" > .env
         sed -i \
         -e "s|DOMAIN=.*|DOMAIN=${env.domain}|" \
-        -e "s|CLIENT_BROWSER_API_URL=.*|CLIENT_BROWSER_API_URL=${env.domain}|" \
-        -e "s|CLIENT_BROWSER_API_CABLE_URL=.*|CLIENT_BROWSER_API_CABLE_URL=${env.domain}/cable|" \
+        -e "s|CLIENT_BROWSER_API_URL=.*|CLIENT_BROWSER_API_URL=https://${env.domain}|" \
+        -e "s|CLIENT_BROWSER_API_CABLE_URL=.*|CLIENT_BROWSER_API_CABLE_URL=https://${env.domain}/cable|" \
         environment/manifold.env
         sed -i \
         -e 's|- "4000:80"|- "80:80"|' \
-        -e 's|- "4001:443"|- "4001:443"|' \
+        -e 's|- "4001:443"|- "443:443"|' \
         docker-compose.yml
         docker-compose up -d
+        docker exec -it manifold_api_rails_1 rails manifold:user:create:admin['${user.email}','${user.appPassword}','Site','Admin']
     - env.file.AddFavorite:
         nodeGroup: cp
         path: ${globals.path}
