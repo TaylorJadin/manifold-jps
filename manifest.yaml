@@ -3,7 +3,7 @@ id: manifold
 version: '1.0'
 appVersion: latest
 name: Manifold
-logo: https://reclaimcloud-reclm.cdn.jelastic.net/wp-content/uploads/2020/06/cropped-Reclaim-Cloud-Logo-New.png
+logo: https://raw.githubusercontent.com/TaylorJadin/manifold-jps/main/icon.png
 homepage: https://manifoldapp.org
 categories: 
 - apps/education
@@ -67,7 +67,7 @@ actions:
         -e 's|- "4001:443"|- "443:443"|' \
         docker-compose.yml
         docker-compose up -d
-        docker exec -it manifold_api_rails_1 rails manifold:user:create:admin['${user.email}','${user.appPassword}','Site','Admin']
+        docker exec manifold_api_rails_1 rails manifold:user:create:admin['${user.email}','${user.appPassword}','Site','Admin']
     - env.file.AddFavorite:
         nodeGroup: cp
         path: ${globals.path}
