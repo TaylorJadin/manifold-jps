@@ -28,7 +28,7 @@ nodes:
     nodeGroup: cp
     cloudlets: 32
     fixedcloudlets: 1
-    displayName: AppServer
+    displayName: App Server
     volumes: ["${globals.path}"]
 
 settings:
@@ -55,7 +55,9 @@ actions:
         cd ${globals.path}
         git clone ${globals.repo} --depth 1 .
         rm MANIFOLD_VERSION
-        LATEST_STABLE=$(curl https://api.github.com/repos/ManifoldScholar/manifold-docker-compose/tags | grep "name" | grep -v "-" | head -1 | cut -d '"' -f4)
+        rm .gitignore
+        rm -rf .git
+        LATEST_STABLE=$(curl -s https://api.github.com/repos/ManifoldScholar/manifold-docker-compose/tags | grep "name" | grep -v "-" | head -1 | cut -d '"' -f4)
         echo "MANIFOLD_TAG=$LATEST_STABLE" > .env
         sed -i \
         -e "s|DOMAIN=.*|DOMAIN=${env.domain}|" \
@@ -67,6 +69,12 @@ actions:
         -e 's|- "4001:443"|- "443:443"|' \
         docker-compose.yml
         docker-compose up -d
+        # wait for the application to be ready
+        until $(curl --output /dev/null --silent --head --fail https://{env.domain}/); do
+          printf '.'
+          sleep 1
+        done
+        # Add admin user
         docker exec manifold_api_rails_1 rails manifold:user:create:admin['${user.email}','${user.appPassword}','Site','Admin']
     - env.file.AddFavorite:
         nodeGroup: cp
@@ -75,3 +83,8 @@ actions:
     
 success: | 
   **${env.displayName}**: [https://${env.domain}/](https://${env.domain}/)
+  **Username:** ${user.email}
+  **Password:** ${user.appPassword}
+
+  Find out more about using this docker-based Manifold install by checking out the Manifold documentation:
+  https://manifoldscholar.github.io/manifold-docusaurus/docs
