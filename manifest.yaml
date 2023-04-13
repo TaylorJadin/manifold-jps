@@ -83,8 +83,9 @@ actions:
     
 success: | 
   **${env.displayName}**: [https://${env.domain}/](https://${env.domain}/)
+
   **Username:** ${user.email}
+
   **Password:** ${user.appPassword}
 
-  Find out more about using this docker-based Manifold install by checking out the Manifold documentation:
-  https://manifoldscholar.github.io/manifold-docusaurus/docs
+  Find out more about using this docker-based Manifold install by [checking out the official Manifold documentation](https://manifoldscholar.github.io/manifold-docusaurus/docs).
