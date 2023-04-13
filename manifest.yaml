@@ -1,0 +1,108 @@
+type: install
+id: manifold
+version: '1.0'
+appVersion: latest
+name: Manifold
+logo: https://reclaimcloud-reclm.cdn.jelastic.net/wp-content/uploads/2020/06/cropped-Reclaim-Cloud-Logo-New.png
+homepage: https://manifoldapp.org
+categories: 
+- apps/education
+description: 
+  text: "Manifold is the friendly, scalable, sustainable way to add the web to your publishing workflow."
+  short: "Manifold is the friendly, scalable, sustainable way to add the web to your publishing workflow."
+
+globals:
+  shortname: manifold
+  path: /root/manifold
+  repo: https://github.com/ManifoldScholar/manifold-docker-compose.git
+
+nodes:
+  nodeType: dockerengine
+  nodeGroup: cp
+  cloudlets: 32
+  fixedcloudlets: 1
+  extip: true
+  displayName: AppServer
+  addons: [change-domain, update]
+  volumes: ["${globals.path}"]
+
+settings:
+  domain:
+    fields:
+      - name: displayfield
+        type: displayfield
+        hideLabel: true
+        markup: |
+          The new domain should already have an A record pointed at this environment's IP address.
+      - name: domain
+        hideLabel: true
+        caption: Domain
+        type: string
+        vtype: extdomain
+
+onInstall:
+  - setup
+
+actions:
+  setup:      
+    - cmd[cp]: |-
+        mkdir -p ${globals.path}
+        cd ${globals.path}
+        git clone ${globals.repo}
+        sed -i \
+        -e "s|DOMAIN=.*|DOMAIN=${env.domain}|" \
+        -e "s|CLIENT_BROWSER_API_URL=.*|CLIENT_BROWSER_API_URL=${env.domain}|" \
+        -e "s|CLIENT_BROWSER_API_CABLE_URL=.*|CLIENT_BROWSER_API_CABLE_URL=${env.domain}/cable|" \
+        environment/manifold.env
+        docker-compose up -d
+    - env.file.AddFavorite:
+        nodeGroup: cp
+        path: ${globals.path}
+        keyword: ${globals.shortname}
+
+addons:
+  - id: change-domain
+    name: Domain Configuration
+    description: Change domain name and issue Let's Encrypt certificates.
+    permanent: true
+    buttons:
+      - confirmText: Are you sure you want to proceed?
+        loadingText: Changing domain...
+        action: changeDomain
+        caption: Change
+        successText: The domain has been updated successfully!
+        settings: domain
+        title: Please specify the new domain name
+
+    actions:
+      changeDomain:
+        - cmd[cp]: |-
+            cd ${globals.path}
+            sed -i \
+            -e "s|DOMAIN=.*|DOMAIN=${settings.domain}|" \
+            -e "s|CLIENT_BROWSER_API_URL=.*|CLIENT_BROWSER_API_URL=${settings.domain}|" \
+            -e "s|CLIENT_BROWSER_API_CABLE_URL=.*|CLIENT_BROWSER_API_CABLE_URL=${settings.domain}/cable|" \
+            environment/manifold.env
+            docker-compose up -d --force-recreate
+    
+  - id: update
+    name: Update
+    description: Pull the latest version of docker containers
+    permanent: true
+    buttons:
+      - confirmText: Are you sure you want to proceed?
+        loadingText: Updating...
+        action: pullContainers
+        caption: Update
+        successText: Your environment has been updated!
+        title: Update
+    actions:
+      pullContainers:
+        -  cmd[cp]: |-
+            cd ${globals.path}
+            docker-compose pull
+            docker-compose down
+            docker-compose up -d --force-recreate
+success: | 
+  **${env.displayName}**: [https://${env.domain}/](https://${env.domain}/)
+  - If you want to map a custom domain, point an A record at **${nodes.cp.extIPs}** then use the **Domain Configuration** Add-On to change the domain name and issue a new Let's Encrypt cert.
