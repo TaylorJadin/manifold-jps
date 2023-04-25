@@ -87,7 +87,7 @@ actions:
           path: /etc/nginx/nginx-jelastic.conf
           replacements:
             - pattern: 'http://default_upstream;'
-              replacement: 'https://default_upstream;'
+              replacement: 'https://default_upstream:443;'
     - restartNodes:
         nodeType: nginx
     
