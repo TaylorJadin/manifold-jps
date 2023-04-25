@@ -46,10 +46,11 @@ settings:
         vtype: extdomain
 
 onInstall:
-  - setup
+  - manifoldSetup
+  - nginxSetup
 
 actions:
-  setup:      
+  manifoldSetup: 
     - cmd[cp]: |-
         mkdir -p ${globals.path}
         cd ${globals.path}
@@ -80,6 +81,15 @@ actions:
         nodeGroup: cp
         path: ${globals.path}
         keyword: ${globals.shortname}
+  nginxSetup:
+    - replaceInFile:
+        - nodeType: nginx
+          path: /etc/nginx/nginx-jelastic.conf
+          replacements:
+            - pattern: 'http://default_upstream;'
+              replacement: 'https://default_upstream;'
+    - restartNodes:
+        nodeType: nginx
     
 success: | 
   **${env.displayName}**: [https://${env.domain}/](https://${env.domain}/)
