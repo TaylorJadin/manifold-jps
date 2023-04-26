@@ -14,22 +14,20 @@ description:
 globals:
   shortname: manifold
   path: /root/manifold
-  repo: https://github.com/ManifoldScholar/manifold-docker-compose.git
+  repo: https://github.com/taylorjadin/manifold-jps
   manifold_tag: 
 
 ssl: true
 
 nodes:
-  - cloudlets: 4
-    count: 1
-    nodeGroup: bl
-    nodeType: nginx
-  - nodeType: dockerengine
-    nodeGroup: cp
-    cloudlets: 32
-    fixedcloudlets: 1
-    displayName: App Server
-    volumes: ["${globals.path}"]
+  nodeType: dockerengine
+  nodeGroup: cp
+  cloudlets: 32
+  fixedcloudlets: 1
+  extip: true
+  displayName: AppServer
+  addons: [change-domain, update]
+  volumes: ["${globals.path}"]
 
 settings:
   domain:
@@ -47,7 +45,6 @@ settings:
 
 onInstall:
   - manifoldSetup
-  - nginxSetup
 
 actions:
   manifoldSetup: 
@@ -55,21 +52,16 @@ actions:
         mkdir -p ${globals.path}
         cd ${globals.path}
         git clone ${globals.repo} --depth 1 .
-        rm MANIFOLD_VERSION
-        rm .gitignore
+        rm manifest.yaml
+        rm readme.md
         rm -rf .git
         LATEST_STABLE=$(curl -s https://api.github.com/repos/ManifoldScholar/manifold-docker-compose/tags | grep "name" | grep -v "-" | head -1 | cut -d '"' -f4)
-        echo "MANIFOLD_TAG=$LATEST_STABLE" > .env
         sed -i \
+        -e "s|MANIFOLD_TAG=.*|MANIFOLD_TAG=$LATEST_STABLE" \
         -e "s|DOMAIN=.*|DOMAIN=${env.domain}|" \
         -e "s|CLIENT_BROWSER_API_URL=.*|CLIENT_BROWSER_API_URL=https://${env.domain}|" \
         -e "s|CLIENT_BROWSER_API_CABLE_URL=.*|CLIENT_BROWSER_API_CABLE_URL=https://${env.domain}/cable|" \
-        -e "s|SSL_ENABLED=.*|SSL_ENABLED=true|" \
-        environment/manifold.env
-        sed -i \
-        -e 's|- "4000:80"|- "80:80"|' \
-        -e 's|- "4001:443"|- "443:443"|' \
-        docker-compose.yml
+        .env
         docker-compose up -d
         # wait for the database to be ready
         sleep 10
@@ -92,6 +84,31 @@ actions:
               replacement: 'server ${nodes.cp.address}:443;' 
     - restartNodes:
         nodeType: nginx
+
+addons:
+  - id: change-domain
+    name: Domain Configuration
+    description: Change domain name and issue Let's Encrypt certificates.
+    permanent: true
+    buttons:
+      - confirmText: Are you sure you want to proceed?
+        loadingText: Changing domain...
+        action: changeDomain
+        caption: Change
+        successText: The domain has been updated successfully!
+        settings: domain
+        title: Please specify the new domain name
+
+    actions:
+      changeDomain:
+        - cmd[cp]: |-
+            cd ${globals.path}
+            sed -i \
+            -e "s|DOMAIN=.*|DOMAIN=${settings.domain}|" \
+            -e "s|CLIENT_BROWSER_API_URL=.*|CLIENT_BROWSER_API_URL=https://${settings.domain}|" \
+            -e "s|CLIENT_BROWSER_API_CABLE_URL=.*|CLIENT_BROWSER_API_CABLE_URL=https://${settings.domain}/cable|" \
+            .env
+            docker-compose up -d --force-recreate
     
 success: | 
   **${env.displayName}**: [https://${env.domain}/](https://${env.domain}/)
