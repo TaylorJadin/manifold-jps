@@ -27,6 +27,8 @@ services:
     volumes:
       - ./data/api/public:/opt/manifold/api/public
       - ./data/sockets:/manifold_sockets
+    env_file:
+      - ./environment/manifold.env
     networks:
       - network1
     command: ["./start-and-run", "bin/cable"]
@@ -35,6 +37,9 @@ services:
     volumes:
       - ./data/api/public:/opt/manifold/api/public
       - ./data/sockets:/manifold_sockets
+    env_file:
+      - ./environment/manifold.env
+      - ./environment/rails.env
     networks:
       - network1
     command: ["./start-and-run", "bin/zhong zhong.rb"]
@@ -43,6 +48,8 @@ services:
     volumes:
       - ./data/api/public:/opt/manifold/api/public
       - ./data/sockets:/manifold_sockets
+    env_file:
+      - ./environment/manifold.env
     command: ["./start-and-run", "bin/puma -C config/puma.rb"]
     networks:
       - network1
@@ -51,29 +58,35 @@ services:
     volumes:
       - ./data/api/public:/opt/manifold/api/public
       - ./data/sockets:/manifold_sockets
+    env_file:
+      - ./environment/manifold.env
     networks:
       - network1
     command: ["./start-and-run", "bin/sidekiq"]
   client:
     image: manifoldscholarship/manifold-client:${MANIFOLD_TAG}
+    env_file:
+      - ./environment/manifold.env
     volumes:
       - ./data/api/public:/opt/manifold/api/public
       - ./data/sockets:/manifold_sockets
     command: yarn run start-docker
     networks:
       - network1
-      
-  manifold-proxy:
+  proxy:
     image: manifoldscholarship/manifold-nginx:${MANIFOLD_TAG}
-    volumes:
-      - ./data/nginx/ssl:/etc/nginx/ssl
-      - ./data/api/public:/opt/manifold/api/public
-      - ./data/sockets:/manifold_sockets
     environment:
       VIRTUAL_PORT: 80
       VIRTUAL_HOST: ${DOMAIN}
       LETSENCRYPT_HOST: ${DOMAIN}
       LETSENCRYPT_EMAIL: ${EMAIL}
+    volumes:
+      - ./data/nginx/ssl:/etc/nginx/ssl
+      - ./data/api/public:/opt/manifold/api/public
+      - ./data/sockets:/manifold_sockets
+    ports:
+     - "4000:80"
+     - "4001:443"
     command: ["start-nginx"]
     networks:
       - network1
@@ -109,8 +122,10 @@ services:
     networks:
       - network1
 
-volumes:
-  certs:
+
+#volumes:
+#  manifold_data:
+#  manifold_sockets:
 
 networks:
   network1:

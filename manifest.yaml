@@ -60,9 +60,12 @@ actions:
         -e "s|MANIFOLD_TAG=.*|MANIFOLD_TAG=$LATEST_STABLE|" \
         -e "s|DOMAIN=.*|DOMAIN=${env.domain}|" \
         -e "s|EMAIL=.*|EMAIL=${user.email}|" \
+        .env
+        sed -i \
+        -e "s|DOMAIN=.*|DOMAIN=${env.domain}|" \
         -e "s|CLIENT_BROWSER_API_URL=.*|CLIENT_BROWSER_API_URL=https://${env.domain}|" \
         -e "s|CLIENT_BROWSER_API_CABLE_URL=.*|CLIENT_BROWSER_API_CABLE_URL=https://${env.domain}/cable|" \
-        .env
+        environment/manifold.env
         docker-compose up -d
         # wait for the database to be ready
         sleep 10
@@ -106,9 +109,12 @@ addons:
             cd ${globals.path}
             sed -i \
             -e "s|DOMAIN=.*|DOMAIN=${settings.domain}|" \
+            .env
+            sed -i \
+            -e "s|DOMAIN=.*|DOMAIN=${settings.domain}|" \
             -e "s|CLIENT_BROWSER_API_URL=.*|CLIENT_BROWSER_API_URL=https://${settings.domain}|" \
             -e "s|CLIENT_BROWSER_API_CABLE_URL=.*|CLIENT_BROWSER_API_CABLE_URL=https://${settings.domain}/cable|" \
-            .env
+            environment/manifold.env
             docker-compose up -d --force-recreate
     
 success: | 
