@@ -26,7 +26,7 @@ nodes:
   fixedcloudlets: 1
   extip: true
   displayName: AppServer
-  addons: [change-domain, update]
+  addons: [change-domain]
   volumes: ["${globals.path}"]
 
 settings:
@@ -53,11 +53,13 @@ actions:
         cd ${globals.path}
         git clone ${globals.repo} --depth 1 .
         rm manifest.yaml
+        rm icon.png
         rm -rf .git
         LATEST_STABLE=$(curl -s https://api.github.com/repos/ManifoldScholar/manifold-docker-compose/tags | grep "name" | grep -v "-" | head -1 | cut -d '"' -f4)
         sed -i \
         -e "s|MANIFOLD_TAG=.*|MANIFOLD_TAG=$LATEST_STABLE|" \
         -e "s|DOMAIN=.*|DOMAIN=${env.domain}|" \
+        -e "s|EMAIL=.*|EMAIL=${user.email}|" \
         -e "s|CLIENT_BROWSER_API_URL=.*|CLIENT_BROWSER_API_URL=https://${env.domain}|" \
         -e "s|CLIENT_BROWSER_API_CABLE_URL=.*|CLIENT_BROWSER_API_CABLE_URL=https://${env.domain}/cable|" \
         .env
