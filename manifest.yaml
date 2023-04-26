@@ -24,7 +24,6 @@ nodes:
     count: 1
     nodeGroup: bl
     nodeType: nginx
-    extip: true
   - nodeType: dockerengine
     nodeGroup: cp
     cloudlets: 32
