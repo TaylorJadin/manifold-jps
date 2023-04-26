@@ -53,7 +53,6 @@ actions:
         cd ${globals.path}
         git clone ${globals.repo} --depth 1 .
         rm manifest.yaml
-        rm readme.md
         rm -rf .git
         LATEST_STABLE=$(curl -s https://api.github.com/repos/ManifoldScholar/manifold-docker-compose/tags | grep "name" | grep -v "-" | head -1 | cut -d '"' -f4)
         sed -i \
