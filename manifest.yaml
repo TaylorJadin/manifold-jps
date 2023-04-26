@@ -87,7 +87,9 @@ actions:
           path: /etc/nginx/nginx-jelastic.conf
           replacements:
             - pattern: 'http://default_upstream;'
-              replacement: 'https://default_upstream:443;'
+              replacement: 'https://default_upstream;'
+            - pattern: 'server ${nodes.(nginx)[(0)].(intIP)};'
+              replacement: 'server ${nodes.(nginx)[(0)].(intIP)}:443;' 
     - restartNodes:
         nodeType: nginx
     
