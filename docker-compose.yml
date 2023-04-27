@@ -9,6 +9,8 @@ services:
       POSTGRES_HOST_AUTH_METHOD: 'trust'
     networks:
       - network1
+    restart: unless-stopped
+  
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:5.6.7
     environment:
@@ -16,12 +18,16 @@ services:
       xpack.security.enabled: 'false'
     networks:
       - network1
+    restart: unless-stopped
+  
   redis:
     image: redis:alpine
     volumes:
       - ./data/redis:/data
     networks:
       - network1
+    restart: unless-stopped
+  
   api_cable:
     image: manifoldscholarship/manifold-api:${MANIFOLD_TAG}
     volumes:
@@ -32,6 +38,8 @@ services:
     networks:
       - network1
     command: ["./start-and-run", "bin/cable"]
+    restart: unless-stopped
+  
   api_clockwork:
     image: manifoldscholarship/manifold-api:${MANIFOLD_TAG}
     volumes:
@@ -43,6 +51,8 @@ services:
     networks:
       - network1
     command: ["./start-and-run", "bin/zhong zhong.rb"]
+    restart: unless-stopped
+  
   api_rails:
     image: manifoldscholarship/manifold-api:${MANIFOLD_TAG}
     volumes:
@@ -53,6 +63,8 @@ services:
     command: ["./start-and-run", "bin/puma -C config/puma.rb"]
     networks:
       - network1
+    restart: unless-stopped
+
   api_sidekiq:
     image: manifoldscholarship/manifold-api:${MANIFOLD_TAG}
     volumes:
@@ -63,6 +75,8 @@ services:
     networks:
       - network1
     command: ["./start-and-run", "bin/sidekiq"]
+    restart: unless-stopped
+
   client:
     image: manifoldscholarship/manifold-client:${MANIFOLD_TAG}
     env_file:
@@ -73,6 +87,8 @@ services:
     command: yarn run start-docker
     networks:
       - network1
+    restart: unless-stopped
+
   proxy:
     image: manifoldscholarship/manifold-nginx:${MANIFOLD_TAG}
     environment:
@@ -84,10 +100,8 @@ services:
       - ./data/nginx/ssl:/etc/nginx/ssl
       - ./data/api/public:/opt/manifold/api/public
       - ./data/sockets:/manifold_sockets
-    ports:
-     - "4000:80"
-     - "4001:443"
     command: ["start-nginx"]
+    restart: unless-stopped
     networks:
       - network1
 
