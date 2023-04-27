@@ -122,8 +122,8 @@ services:
     networks:
       - network1
 
-
-#volumes:
+volumes:
+   certs:
 #  manifold_data:
 #  manifold_sockets:
 
