@@ -113,6 +113,6 @@ success: |
 
   **Password:** ${user.appPassword}
   
-  Learn how to map a custom domain, set up email, and apply updates: [Running Manifold on Reclaim Cloud](https://support.reclaimhosting.com/hc/en-us/articles/13996626600471-Running-Manifold-on-Reclaim-Cloud#running-manifold-on-reclaim-cloud-0-0)
+  Learn how to map a custom domain, set up email, and apply updates: [Running Manifold on Reclaim Cloud](https://support.reclaimhosting.com/hc/en-us/articles/13996626600471-Running-Manifold-on-Reclaim-Cloud)
   
   Find out more about using this docker-based Manifold install by [checking out the official Manifold documentation](https://manifoldscholar.github.io/manifold-docusaurus/docs).
