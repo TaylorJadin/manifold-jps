@@ -55,7 +55,8 @@ actions:
         rm manifest.yaml
         rm icon.png
         rm -rf .git
-        LATEST_STABLE=$(curl -s https://api.github.com/repos/ManifoldScholar/manifold-docker-compose/tags | grep "name" | grep -v "-" | head -1 | cut -d '"' -f4)
+        # LATEST_STABLE=$(curl -s https://api.github.com/repos/ManifoldScholar/manifold-docker-compose/tags | grep "name" | grep -v "-" | head -1 | cut -d '"' -f4)
+        LATEST_STABLE=v7.1.0
         sed -i \
         -e "s|MANIFOLD_TAG=.*|MANIFOLD_TAG=$LATEST_STABLE|" \
         -e "s|DOMAIN=.*|DOMAIN=${env.domain}|" \
