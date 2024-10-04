@@ -74,7 +74,7 @@ actions:
         # Add admin user
         docker exec manifold_api_rails_1 rails manifold:user:create:admin['${user.email}','${user.appPassword}','Site','Admin']
         # Fix email (https://github.com/ManifoldScholar/manifold/issues/3584)
-        docker exec manifold_api_rails_1 touch /opt/manifold/api/public/mail_styles.css
+        docker exec manifold-api_rails_1 touch /opt/manifold/api/public/mail_styles.css
     - env.file.AddFavorite:
         nodeGroup: cp
         path: ${globals.path}
